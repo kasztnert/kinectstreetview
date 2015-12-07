@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<!-- saved from url=(0014)about:internet -->
+<html>
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <style type="text/css">
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        #map, #sv {
+            height: 100%;
+            width: 45%;
+            display: inline-block
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    <div id="sv"></div>
+    <script type="text/javascript">
+
+        var map;
+        var sv;
+        function initMap() {
+            map = new google.maps.Map(document.getElementById('map'), {
+                center: { lat: -33.9, lng: 151.01 },
+                zoom: 10
+            });
+            sv = new google.maps.StreetViewPanorama(document.getElementById('sv'), {
+                position: map.getCenter(),
+                pov: {
+                    heading: 0, pitch: 0
+                }
+            });
+            map.setStreetView(sv);
+            //sv = map.getStreetView();
+        }
+
+        function moveForward() {
+            // streetview is not visible - do not move
+            if (!sv.getVisible()) {
+                return;
+            }
+            var h = sv.getPov().heading;
+            if (h < 0) {
+                h += 360;
+            }
+            var links = sv.getLinks();
+            // there are no links - do not move
+            if (links.length == 0) {
+                return;
+            }
+            var link = null;
+            // find the link with the closest orientation to our current heading (closest to forward)
+            for (var i in links) {
+                if (link == null) {
+                    link = links[i];
+                    continue;
+                }
+                if (Math.abs(link.heading - h) > Math.abs(links[i].heading)) {
+                    link = links[i];
+                }
+            }
+            var pov = sv.getPov();
+            pov.heading = link.heading;
+            sv.setPov(pov);
+            sv.setPano(link.pano);
+        }
+
+        function turnToLink(dir) {
+            // streetview is not visible - do not turn
+            if (!sv.getVisible()) {
+                return;
+            }
+            var links = sv.getLinks();
+            // there are no links - do not turn
+            if (links.length == 0) {
+                return;
+            }
+            var h = sv.getPov().heading;
+            if (h < 0) {
+                h += 360;
+            }
+            var headings = [h];
+            for (var i in links) {
+                headings.push(links[i].heading);
+            }
+            // sort all possible headings
+            if (dir[0] == 'l') {
+                // if turning left, ascending order
+                headings.sort(function (a, b) {
+                    return a - b;
+                });
+            } else {
+                // if turning right, descending
+                headings.sort(function (a, b) {
+                    return b - a;
+                });
+            }
+            var filtered = [];
+            var i = 0;
+            while (i < headings.length - 1) {
+                if (headings[i] == headings[i + 1]) {
+                    headings.splice(i + 1, 1);
+                } else {
+                    ++i;
+                }
+            }
+            // find current heading
+            var idx = headings.indexOf(h);
+            var newh = h;
+            if (idx == 0) {
+                h = headings[headings.length - 1];
+            } else {
+                h = headings[idx - 1];
+            }
+            var pov = sv.getPov();
+            pov.heading = h;
+            sv.setPov(pov);
+        }
+
+        function setMapVisible(visible) {
+            var mapdiv = $('#map');
+            if (visible === undefined) {
+                visible = !mapdiv.is(':visible');
+            }
+            if (visible) {
+                $('#sv').css('width', '45%');
+                mapdiv.show();
+            } else {
+                mapdiv.hide();
+                $('#sv').css('width', '100%');
+            }
+            google.maps.event.trigger(sv, 'resize')
+        }
+
+        function test() {
+            movecount = 0;
+            var panoChangedListener = sv.addListener('pano_changed', function () {
+                console.log('pano_changed')
+                if (movecount++ > 10) {
+                    return;
+                }
+                moveForward();
+            });
+            moveForward();
+        }
+    </script>
+    <script async defer
+            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBJPrirpCmexnPr5uH7K5BNQcNtES3nJGk&callback=initMap">
+    </script>
+</body>
+</html>

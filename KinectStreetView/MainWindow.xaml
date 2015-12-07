@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:KinectStreetView"
         mc:Ignorable="d"
-        Title="MainWindow" Height="642.639" Width="850">
+        Title="MainWindow" Height="642.639" Width="850" Loaded="Window_Loaded">
 	<Grid x:Name="grMain">
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto" />
@@ -17,11 +17,12 @@
 				<Button x:Name="btnRightLink" Content="Right link" Click="btnRightLink_Click" />
 				<Button x:Name="btnLeftLink" Content="Left link" Click="btnLeftLink_Click" />
 				<Button x:Name="btnToggleMap" Content="Toggle map" Click="btnToggleMap_Click" />
+				<Button x:Name="btnHideImage" Content="Hide image" Click="btnHideImage_Click" />
 			</ToolBar>
 		</ToolBarTray>
 		<WebBrowser x:Name="wbStreetView" VerticalAlignment="Stretch" Grid.Row="1" />
 		<Viewbox Grid.Row="1">
-		<Image x:Name="image" Margin="0" Grid.Row="1" />
+		<Image x:Name="imgForeground" Margin="0" Grid.Row="1" />
 		</Viewbox>
 	</Grid>
 </Window>

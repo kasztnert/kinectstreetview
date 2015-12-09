@@ -1,11 +1,12 @@
-﻿using System;
+﻿#if false
+using System;
 using Microsoft.Kinect;
 
 namespace KinectBackgroundRemoval {
-	/// <summary>
-	/// Provides extension methods for removing the background of a Kinect frame.
-	/// </summary>
-	public class BackgroundRemovalTool {
+/// <summary>
+    /// Provides extension methods for removing the background of a Kinect frame.
+    /// </summary>
+    public class BackgroundRemovalTool {
 		#region Constants
 
 		/// <summary>
@@ -188,3 +189,4 @@ namespace KinectBackgroundRemoval {
 
 	}
 }
+#endif

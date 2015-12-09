@@ -33,7 +33,8 @@
                 position: map.getCenter(),
                 pov: {
                     heading: 0, pitch: 0
-                }
+                },
+                
             });
             map.setStreetView(sv);
             //sv = map.getStreetView();
@@ -135,6 +136,21 @@
                 $('#sv').css('width', '100%');
             }
             google.maps.event.trigger(sv, 'resize')
+        }
+
+        function setHideControls(hide) {
+            sv = new google.maps.StreetViewPanorama(document.getElementById('sv'), {
+                position: map.getCenter(),
+                pov: {
+                    heading: 0, pitch: 0
+                },
+                linksControl: hide,
+                fullScreenControl: hide,
+                addressControl: hide,
+                zoomControl: hide,
+                panControl: hide
+            });
+            map.setStreetView(sv);
         }
 
         function test() {

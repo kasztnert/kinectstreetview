@@ -13,13 +13,17 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Microsoft.Kinect;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.Windows.Forms;
+
 
 namespace KinectStreetView {
 	/// <summary>
 	/// Interaction logic for MainWindow.xaml
 	/// </summary>
 	public partial class MainWindow : Window {
-        KinectSensor sensor = null;
+        //KinectSensor sensor = null;
         //MultiSourceFrameReader frameReader = null;
         //KinectBackgroundRemoval.BackgroundRemovalTool bgRemover = null;
         Boolean hideControl = true;
@@ -27,7 +31,7 @@ namespace KinectStreetView {
 			InitializeComponent();
 			wbStreetView.Source = new Uri(System.IO.Path.GetFullPath("sv.html"));
             //imgForeground.Source = new BitmapImage(new Uri(System.IO.Path.GetFullPath("cili.png")));
-            sensor = KinectSensor.GetDefault();
+            //sensor = KinectSensor.GetDefault();
             //frameReader = sensor.OpenMultiSourceFrameReader(FrameSourceTypes.Body | FrameSourceTypes.Color | FrameSourceTypes.BodyIndex | FrameSourceTypes.Depth);
             //bgRemover = new KinectBackgroundRemoval.BackgroundRemovalTool(sensor.CoordinateMapper);
         }
@@ -60,56 +64,16 @@ namespace KinectStreetView {
 
         private void btnSaveWindow_Click(object sender, RoutedEventArgs e)
         {
-            util.SaveWindow(this, 96, "C:\\Users\\Fanni\\Documents\\kinectstreetview\\window.png"); 
+            var bitmap = new Bitmap(Screen.PrimaryScreen.Bounds.Width,
+                                     Screen.PrimaryScreen.Bounds.Height);
+            Graphics graphics = Graphics.FromImage(bitmap);
+            graphics.CopyFromScreen(0, 0, 0, 0, bitmap.Size);
+            bitmap.Save(@"C:\Users\Fanni\Documents\kinectstreetview\window.png", ImageFormat.Png);
         }
 
-        private void btnSaveCanvas_Click(object sender, RoutedEventArgs e) 
-        {
-            util.SaveCanvas(this, this.grMain, 96, "C:\\Users\\Fanni\\Documents\\kinectstreetview\\canvas.png"); 
-        }
+        
+      
 
-        public static class util {
-            public static void SaveWindow(Window window, int dpi, string filename) {
-
-                var rtb = new RenderTargetBitmap(
-                    (int)window.Width, //width 
-                    (int)window.Width, //height 
-                    dpi, //dpi x 
-                    dpi, //dpi y 
-                    PixelFormats.Pbgra32 // pixelformat 
-                    );
-                rtb.Render(window);
-
-                SaveRTBAsPNG(rtb, filename);
-
-            }
-
-            public static void SaveCanvas(Window window, Grid grid, int dpi, string filename) {
-                Size size = new Size(window.Width, window.Height);
-                grid.Measure(size);
-                //canvas.Arrange(new Rect(size));
-
-                var rtb = new RenderTargetBitmap(
-                    (int)window.Width, //width 
-                    (int)window.Height, //height 
-                    dpi, //dpi x 
-                    dpi, //dpi y 
-                    PixelFormats.Pbgra32 // pixelformat 
-                    );
-                rtb.Render(grid);
-
-                SaveRTBAsPNG(rtb, filename);
-            }
-
-            private static void SaveRTBAsPNG(RenderTargetBitmap bmp, string filename) {
-                var enc = new System.Windows.Media.Imaging.PngBitmapEncoder();
-                enc.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(bmp));
-
-                using (var stm = System.IO.File.Create(filename)) {
-                    enc.Save(stm);
-                }
-            }
-        } 
 
         private void Window_Loaded(object sender, RoutedEventArgs e) {
 			//frameReader.MultiSourceFrameArrived += FrameReader_MultiSourceFrameArrived;

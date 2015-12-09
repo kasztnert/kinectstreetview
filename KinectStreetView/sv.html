@@ -139,18 +139,15 @@
         }
 
         function setHideControls(hide) {
-            sv = new google.maps.StreetViewPanorama(document.getElementById('sv'), {
-                position: map.getCenter(),
-                pov: {
-                    heading: 0, pitch: 0
-                },
+            sv.setOptions({
                 linksControl: hide,
                 fullScreenControl: hide,
                 addressControl: hide,
                 zoomControl: hide,
-                panControl: hide
-            });
-            map.setStreetView(sv);
+                panControl: hide,
+                imageDateControl: hide,
+
+            });  
         }
 
         function test() {

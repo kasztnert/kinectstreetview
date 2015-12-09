@@ -6,7 +6,6 @@
         xmlns:local="clr-namespace:KinectStreetView"
         mc:Ignorable="d" 
         Title="MainWindow" Height="642.639" Width="850" Loaded="Window_Loaded">
-    <Canvas Height="642.639" Width="850" >
     <Grid x:Name="grMain">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -22,7 +21,7 @@
                 <ToggleButton IsChecked="{Binding ElementName=pup, Path=IsOpen}" Content="Open Popup" />
                 <Button x:Name="btnHideControls" Content="Hide controls" Click="btnHideControls_Click" />
                 <Button x:Name="btnSaveWindow" Content="Save window" Click="btnSaveWindow_Click" />
-                <Button x:Name="btnSaveCanvas" Content="Save canvas" Click="btnSaveCanvas_Click" />
+               
             </ToolBar>
         </ToolBarTray>
        
@@ -35,5 +34,4 @@
         </Popup>
        
     </Grid>
-    </Canvas>
 </Window>

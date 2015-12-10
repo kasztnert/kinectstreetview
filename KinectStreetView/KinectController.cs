@@ -8,6 +8,8 @@ using Microsoft.Kinect;
 
 namespace KinectStreetView {
 	class KinectController {
+		public delegate void HandMoveDelegate(int x, int y);
+
 		static Body[] bodies = null;
 		static int ScreenWidth = Screen.PrimaryScreen.Bounds.Width;
 		static int ScreenHeight = Screen.PrimaryScreen.Bounds.Height;
@@ -19,6 +21,7 @@ namespace KinectStreetView {
 
 		public static event EventHandler GoForward;
 		public static event EventHandler TakePhoto;
+		public static event HandMoveDelegate LeftHandMoved;
 		/// <summary>
 		/// The max duration of a mouse click
 		/// </summary>
@@ -100,7 +103,7 @@ namespace KinectStreetView {
 			var lAnkle = body.Joints[JointType.AnkleLeft];
 			var rAnkle = body.Joints[JointType.AnkleRight];
 
-            if (lAnkle.TrackingState == TrackingState.Tracked
+			if (lAnkle.TrackingState == TrackingState.Tracked
 				&& rAnkle.TrackingState == TrackingState.Tracked) {
 
 				if (Math.Abs(lAnkle.Position.Z - rAnkle.Position.Z) < vscreenHeight / 2) {
@@ -112,6 +115,28 @@ namespace KinectStreetView {
 					}
 				} else {
 					goForwardSent = false;
+				}
+			} else if (rhpos.Z > splinebasepos.Z - 0.3 && lhpos.Z < splinebasepos.Z - 0.3) {
+				// left hand raised -> move photo
+				var cursX = lhpos.X;
+				if (cursX < splinebasepos.X - vscreenWidth / 2) {
+					cursX = splinebasepos.X - (float)vscreenWidth / 2;
+				} else if (cursX > splinebasepos.X + vscreenWidth / 2) {
+					cursX = splinebasepos.X + (float)vscreenWidth / 2;
+				}
+				cursX += (float)vscreenWidth / 2 - splinebasepos.X;
+				int x = (int)(ScreenWidth * (cursX / vscreenWidth));
+
+				var cursY = lhpos.Y;
+				if (cursY < splinebasepos.Y) {
+					cursY = splinebasepos.Y;
+				} else if (cursY > headpos.Y) {
+					cursY = headpos.Y;
+				}
+				cursY -= splinebasepos.Y;
+				int y = ScreenHeight - (int)(ScreenHeight * (cursY / vscreenHeight));
+				if (LeftHandMoved != null) {
+					LeftHandMoved(x, y);
 				}
 			}
 

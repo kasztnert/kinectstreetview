@@ -12,13 +12,24 @@
 
         #map, #sv {
             height: 100%;
-            width: 45%;
-            display: inline-block
+            display: inline-block;
+        }
+
+        #map {
+            display: none;
+        }
+
+        #sv {
+            width: 100%;
+        }
+        /* Hide fullscreen button on streetview*/
+        .gm-style > div:nth-child(10) {
+            display: none;
         }
     </style>
 </head>
 <body>
-    <div id="map"></div>
+    <div id="map" style=""></div>
     <div id="sv"></div>
     <script type="text/javascript">
 
@@ -33,7 +44,8 @@
                 position: map.getCenter(),
                 pov: {
                     heading: 0, pitch: 0
-                }
+                },
+
             });
             map.setStreetView(sv);
             //sv = map.getStreetView();
@@ -135,6 +147,18 @@
                 $('#sv').css('width', '100%');
             }
             google.maps.event.trigger(sv, 'resize')
+        }
+
+        function setControlsVisible(hide) {
+            sv.setOptions({
+                linksControl: hide,
+                fullScreenControl: hide,
+                addressControl: hide,
+                zoomControl: hide,
+                panControl: hide,
+                imageDateControl: hide,
+
+            });
         }
 
         function test() {

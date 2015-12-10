@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:KinectStreetView"
         mc:Ignorable="d"
-        Title="MainWindow" Height="642.639" Width="850" Loaded="Window_Loaded">
+        Title="MainWindow" Height="642.639" Width="850" Loaded="Window_Loaded" WindowState="Maximized" WindowStyle="None">
 	<Grid x:Name="grMain">
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto" />
@@ -21,8 +21,10 @@
 			</ToolBar>
 		</ToolBarTray>
 		<WebBrowser x:Name="wbStreetView" VerticalAlignment="Stretch" Grid.Row="1" />
-		<Viewbox Grid.Row="1">
-		<Image x:Name="imgForeground" Margin="0" Grid.Row="1" />
-		</Viewbox>
+		<Popup  Placement="Absolute" PlacementTarget="{Binding ElementName=wbStreetView}"
+				AllowsTransparency="True"  x:Name="pup" IsHitTestVisible="False">
+
+			<Image x:Name="imgForeground" Height="200" Width="200" VerticalAlignment="Bottom" IsHitTestVisible="False"/>
+		</Popup>
 	</Grid>
 </Window>

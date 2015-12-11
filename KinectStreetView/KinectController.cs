@@ -9,6 +9,7 @@ using Microsoft.Kinect;
 namespace KinectStreetView {
 	class KinectController {
 		public delegate void HandMoveDelegate(int x, int y);
+		public delegate void ZoomDelegate(double scale);
 
 		static Body[] bodies = null;
 		static int ScreenWidth = Screen.PrimaryScreen.Bounds.Width;
@@ -22,12 +23,13 @@ namespace KinectStreetView {
 		public static event EventHandler GoForward;
 		public static event EventHandler TakePhoto;
 		public static event HandMoveDelegate LeftHandMoved;
+		public static event ZoomDelegate Zoom;
 		/// <summary>
 		/// The max duration of a mouse click
 		/// </summary>
 		const int MouseClickInterval = 500;
 		public static void ProcessBodyFrame(BodyFrame frame) {
-			if (frame.BodyCount == 0) {
+			if (frame.BodyCount == 0 || Disabled) {
 				return;
 			}
 			bodies = new Body[frame.BodyCount];
@@ -70,6 +72,7 @@ namespace KinectStreetView {
 					mouseDownSent = true;
 					MouseControl.MouseLeftDown();
 				} else if (body.HandRightState != lastHandState) {
+					bool explicitHandState = false;
 					switch (body.HandRightState) {
 					case HandState.Open:
 						if (lastHandState == HandState.Closed) {
@@ -82,6 +85,10 @@ namespace KinectStreetView {
 						mouseDownSent = false;
 						break;
 					case HandState.Closed:
+						if (lastHandState != HandState.Open) {
+							//lastHandState = HandState.Unknown;
+							//explicitHandState = true;
+						}
 						break;
 					case HandState.Lasso:
 					case HandState.Unknown:
@@ -94,27 +101,10 @@ namespace KinectStreetView {
 					default:
 						break;
 					}
-					lastHandState = body.HandRightState;
-					lastHandStateChange = DateTime.Now;
-				}
-			} else {
-				lastHandState = HandState.Unknown;
-			}
-			var lAnkle = body.Joints[JointType.AnkleLeft];
-			var rAnkle = body.Joints[JointType.AnkleRight];
-
-			if (lAnkle.TrackingState == TrackingState.Tracked
-				&& rAnkle.TrackingState == TrackingState.Tracked) {
-
-				if (Math.Abs(lAnkle.Position.Z - rAnkle.Position.Z) < vscreenHeight / 2) {
-					if (!goForwardSent) {
-						if (GoForward != null) {
-							GoForward(null, new EventArgs());
-						}
-						goForwardSent = true;
+					if (!explicitHandState) {
+						lastHandState = body.HandRightState;
 					}
-				} else {
-					goForwardSent = false;
+					lastHandStateChange = DateTime.Now;
 				}
 			} else if (rhpos.Z > splinebasepos.Z - 0.3 && lhpos.Z < splinebasepos.Z - 0.3) {
 				// left hand raised -> move photo
@@ -138,6 +128,31 @@ namespace KinectStreetView {
 				if (LeftHandMoved != null) {
 					LeftHandMoved(x, y);
 				}
+			} else if (rhpos.Z < splinebasepos.Z - 0.3 && lhpos.Z < splinebasepos.Z - 0.3) {
+				// both hands => zoom photo in/out
+				if (Zoom != null) {
+					Zoom(Math.Min(Math.Abs(rhpos.X - lhpos.X), 1) / vscreenWidth);
+				}
+
+			} else {
+				lastHandState = HandState.Unknown;
+			}
+			var lAnkle = body.Joints[JointType.AnkleLeft];
+			var rAnkle = body.Joints[JointType.AnkleRight];
+
+			if (lAnkle.TrackingState == TrackingState.Tracked
+				&& rAnkle.TrackingState == TrackingState.Tracked) {
+
+				if (Math.Abs(lAnkle.Position.Z - rAnkle.Position.Z) < vscreenHeight / 2) {
+					if (!goForwardSent) {
+						if (GoForward != null) {
+							GoForward(null, new EventArgs());
+						}
+						goForwardSent = true;
+					}
+				} else {
+					goForwardSent = false;
+				}
 			}
 
 			if (body.Joints[JointType.ElbowRight].Position.Y >= headpos.Y) {
@@ -148,6 +163,10 @@ namespace KinectStreetView {
 			} else {
 				takePhotoSent = false;
 			}
+		}
+
+		public static bool Disabled {
+			get; set;
 		}
 	}
 }

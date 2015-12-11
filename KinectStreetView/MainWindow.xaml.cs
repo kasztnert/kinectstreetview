@@ -7,6 +7,7 @@ using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Microsoft.Kinect;
+using KinectStreetView.Extensions;
 
 namespace KinectStreetView {
 	/// <summary>
@@ -36,6 +37,9 @@ namespace KinectStreetView {
 		};
 
 		string path;
+
+		Point translate = new Point(0, 0);
+		double scale = 1;
 		public MainWindow() {
 			InitializeComponent();
 			wbStreetView.Source = new Uri(System.IO.Path.GetFullPath("sv.html"));
@@ -79,12 +83,33 @@ namespace KinectStreetView {
 			sensor.Open();
 			pup.Height = wbStreetView.ActualHeight * 0.75;
 			pup.Width = wbStreetView.ActualWidth;
-			pup.VerticalOffset = 100;
+			pup.VerticalOffset = wbStreetView.ActualHeight * 0.25;
 			pup.IsOpen = true;
 			KinectController.GoForward += KinectController_GoForward;
 			KinectController.TakePhoto += KinectController_TakePhoto;
 			photoTimer.Elapsed += PhotoTimer_Elapsed;
 			photoPreviewTimer.Elapsed += PhotoPreviewTimer_Elapsed;
+			this.MaximizeToSecondaryMonitor();
+			KinectController.LeftHandMoved += KinectController_LeftHandMoved;
+			KinectController.Zoom += KinectController_Zoom;
+		}
+
+		private void KinectController_Zoom(double scale) {
+			this.scale = scale;
+			transform();
+		}
+
+		private void KinectController_LeftHandMoved(int x, int y) {
+			translate = new Point(x, y);
+			transform();
+		}
+
+		void transform() {
+			var m = Matrix.Identity;
+			m.Scale(scale, scale);
+			m.Translate(translate.X - cForeground.ActualWidth / 2, translate.Y - cForeground.ActualHeight / 2);
+			imgForeground.RenderTransformOrigin = new Point(0.5, 0.5);
+			imgForeground.RenderTransform = new MatrixTransform(m);
 		}
 
 		private void PhotoPreviewTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e) {
@@ -95,22 +120,32 @@ namespace KinectStreetView {
 
 		int secondsLeft;
 		private void PhotoTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e) {
-			if (--secondsLeft > 0) {
+			if (--secondsLeft >= 0) {
 				Dispatcher.Invoke(new Action(() => {
 					tbCountdown.Text = secondsLeft.ToString();
+					if (secondsLeft == 0) {
+						tbCountdown.Visibility = Visibility.Hidden;
+					}
 				}));
 				photoTimer.Start();
 				return;
 			}
 			photoTimer.Stop();
 			Dispatcher.Invoke(new Action(() => {
-				tbCountdown.Visibility = Visibility.Hidden;
 				ScreenShot();
 				wbStreetView.InvokeScript("setControlsVisible", true);
+				takingPhoto = false;
+				KinectController.Disabled = false;
 			}));
 		}
 
+		bool takingPhoto = false;
 		private void KinectController_TakePhoto(object sender, EventArgs e) {
+			if (takingPhoto) {
+				return;
+			}
+			takingPhoto = true;
+			KinectController.Disabled = true;
 			secondsLeft = ExpSeconds;
 			tbCountdown.Visibility = Visibility.Visible;
 			tbCountdown.Text = secondsLeft.ToString();

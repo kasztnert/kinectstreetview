@@ -11,7 +11,7 @@
 			<RowDefinition Height="Auto" />
 			<RowDefinition Height="*" />
 		</Grid.RowDefinitions>
-		<ToolBarTray Grid.Row="0">
+		<ToolBarTray Grid.Row="0" Visibility="Collapsed">
 			<ToolBar >
 				<Button x:Name="btnGo" Content="Go" Click="btnGo_Click" />
 				<Button x:Name="btnRightLink" Content="Right link" Click="btnRightLink_Click" />
@@ -31,7 +31,8 @@
 						   Canvas.Left="10" Canvas.Top="10"
 						   FontFamily="Comic Sans MS" Foreground="#FF00E7F8" />
 				<Image x:Name="imgPreview" Width="200" Height="200" Visibility="Hidden"
-					   Canvas.Left="10" Canvas.Top="10"/>
+					   Canvas.Left="10" Canvas.Top="10">
+				</Image>
 			</Canvas>
 		</Popup>
 	</Grid>
